@@ -2,7 +2,7 @@
 
 # Script to monitor the FT0 aging
 #
-# Usage: ./run_qc.sh <input_file>
+# Usage: ./ft0_aging_monitoring.sh <input_file>
 # 
 # <input_file> is a text file containing the list of runs to be processed
 # 
@@ -19,7 +19,6 @@ if [ $# -ne 1 ]; then
 fi
 
 year="2023"
-lhcperiod="LHC23zzh_FT0"
 input_file=$1
 
 if [ ! -e $input_file ]; then
@@ -45,15 +44,15 @@ for run in $(cat $input_file); do
 
 	echo "Running QC on run ${run}"
 	# run the QC bash script and wait for it to finish
-	eval "${script_dir}/run_ft0_aging_monitoring_qc.sh" "$year" "$lhcperiod" "$run"
-	# "${script_dir}/run_ft0_aging_monitoring_qc.sh" "$year" "$lhcperiod" "$run" &
+	eval "${script_dir}/run_ft0_aging_qc.sh" "$year" "$run"
+	# "${script_dir}/run_ft0_aging_c.sh" "$year" "$lhcperiod" "$run" &
 	# wait
 
 	echo "Extracting channel ampltidues from the QC results and dump them to a csv file"
-	if [ -e "ft0_aging_monitoring_qc_${run}.root" ]; then
-		root -b -l -q "${root_macro_path}/PrintAgingQcHistograms.C(\"ft0_aging_monitoring_qc_${run}.root\", \"ft0_aging_monitoring_amplitudes_${run}.csv\")"
+	if [ -e "ft0_aging_qc_${run}.root" ]; then
+		root -b -l -q "${root_macro_path}/PrintAgingQcHistograms.C(\"ft0_aging_qc_${run}.root\", \"ft0_aging_amplitudes_${run}.csv\")"
 	else
-		echo "File aging_monitoring_qc_${run}.root does not exist, skipping"
+		echo "File aging_qc_${run}.root does not exist, skipping"
 	fi
 	cd $cwd
 # done < $input_file

@@ -68,11 +68,11 @@ void WriteHistogramsToCSV(const char* outputFileName, TObjArray* histograms) {
 }
 
 void PrintAgingQcHistograms(const char* inputFileName = "ft0_aging_monitoring_qc.root",
-              const char* outputFileName = "ft0_aging_monitoring_amplitudes.csv")
+                            const char* outputFileName = "ft0_aging_monitoring_amplitudes.csv")
 {
   // Open the input file and get the collection of MonitorObjects
   std::unique_ptr<TFile> fInput(TFile::Open(inputFileName, "READ"));
-  TObjArray* moCollection = fInput->Get<TObjArray>("FT0/AgingMonitoring");
+  TObjArray* moCollection = fInput->Get<TObjArray>("FT0/AgingLaser");
   MonitorObject* mo;
 
   TObjArray* histograms = new TObjArray();
