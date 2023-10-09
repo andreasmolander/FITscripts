@@ -120,11 +120,17 @@ ExtractAQC()
         ( $overwrite || [ ! -e aqc_fv0.root ] ) && extract=true || extract=false
     fi
 
+    if [[ "$usealien" = "true" && "$remove_aqcfile" = "true" ]]; then
+        rm QC_fullrun.root
+    fi
+
     if $extract; then
         root -b -l -q "${SCRIPT_DIR}/ExtractAQCPlots.C(${usealien})" > root_log.txt
         if [ $? -ne 0 ]; then
             echo "ROOT macro ${SCRIPT_DIR}/ExtractAQCPlots.C failed. See root_log.txt for info."
             echo "ROOT macro ${SCRIPT_DIR}/ExtractAQCPlots.C failed. See root_log.txt for info." >> log.txt
+            cd $cwd
+            return 1
         fi
     else
         echo "Will not extract plots" >> log.txt
@@ -132,10 +138,6 @@ ExtractAQC()
 
     if $printplots; then
         PrintPlots
-    fi
-
-    if [[ "$usealien" = "true" && "$remove_aqcfile" = "true" ]]; then
-        rm QC_fullrun.root
     fi
 
     cd $cwd
