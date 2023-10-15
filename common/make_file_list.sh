@@ -39,17 +39,20 @@ while [ $# -gt 0 ]; do
 	esac
 done
 
-if [ $type != "raw" ] && [ $type != "calib" ]; then
-	# Asume it's AO2D then
-	echo "Looking for AO2D files"
-	alien_find "/alice/data/${year}/${lhcperiod}/${runnumber}/${type} AO2D*.root" > $filename
-else
+if [ $type == "raw" ] || [ $type == "calib" ]; then
 	echo "Looking for CTF files"
 	if [ -z $lhcperiod ]; then
 		alien_find "/alice/data/${year}/ ${runnumber}/${type}/*/o2_ctf_run*.root" > $filename    
 	else
 		alien_find "/alice/data/${year}/${lhcperiod}/${runnumber}/${type} o2_ctf_run*.root" > $filename
 	fi
+elif [ $type == "mc" ]; then
+	echo "Looking for MC files"
+	alien_find "/alice/sim/${year}/${lhcperiod}/ ${runnumber}/*/AO2D.root" > $filename
+else
+	# Asume it's AO2D then
+	echo "Looking for AO2D files"
+	alien_find "/alice/data/${year}/${lhcperiod}/${runnumber}/${type} AO2D*.root" > $filename
 fi
 
 echo "Total number of files = $(cat $filename | wc -l)"

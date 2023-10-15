@@ -15,6 +15,8 @@ remove_aqcfile=true
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 ROOTSTYLE_DIR="${SCRIPT_DIR}/../root_styles"
 
+cwd=$(pwd)
+
 PrintPlots()
 {
     # Print plots based on aqc_fv0.root in the current working directory
@@ -74,6 +76,14 @@ PrintPlots()
     mv TriggersSoftware.$plotformat plots/TriggersSoftware_logy.$plotformat
 }
 
+Abort()
+{
+    echo "Aborting..."
+    echo "$1" >> "${cwd}/failed.txt"
+    cd $cwd
+    exit 1
+}
+
 ExtractAQC()
 {
     year="$1"
@@ -81,7 +91,8 @@ ExtractAQC()
     runnumber="$3"
     pass="$4"
 
-    cwd=$(pwd)
+    runstring="${year}_${lhcperiod}_${runnumber}_${pass}"
+
     rundir="${cwd}/${lhcperiod}/${pass}/${runnumber}"
 
     if [ ! -d "${rundir}" ]; then
@@ -106,22 +117,16 @@ ExtractAQC()
             qcfullrun_filename=$(alien_find "${alienpath} QC_fullrun.root")
             if [[ $? -ne 0 || "$qcfullrun_filename" = "" ]]; then
                 echo "QC_fullrun.root not found in ${alienpath}" >> log.txt
-                cd $cwd
-                return 1
+                Abort $runstring
             fi
             alien_cp $qcfullrun_filename file:.
             if [ $? -ne 0 ]; then
                 echo "Failed to copy ${qcfullrun_filename}" >> log.txt
-                cd $cwd
-                return 1
+                Abort $runstring
             fi
         fi
     else
         ( $overwrite || [ ! -e aqc_fv0.root ] ) && extract=true || extract=false
-    fi
-
-    if [[ "$usealien" = "true" && "$remove_aqcfile" = "true" ]]; then
-        rm QC_fullrun.root
     fi
 
     if $extract; then
@@ -129,11 +134,15 @@ ExtractAQC()
         if [ $? -ne 0 ]; then
             echo "ROOT macro ${SCRIPT_DIR}/ExtractAQCPlots.C failed. See root_log.txt for info."
             echo "ROOT macro ${SCRIPT_DIR}/ExtractAQCPlots.C failed. See root_log.txt for info." >> log.txt
-            cd $cwd
-            return 1
+            # TODO: remove QC_fullrun.root
+            Abort $runstring
         fi
     else
         echo "Will not extract plots" >> log.txt
+    fi
+
+    if [[ "$usealien" = "true" && "$remove_aqcfile" = "true" ]]; then
+        rm QC_fullrun.root
     fi
 
     if $printplots; then
