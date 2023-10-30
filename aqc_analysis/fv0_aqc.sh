@@ -2,23 +2,22 @@
 
 # Script to extract and analyze asyncronous quality control plots for FV0
 
-set -x # Debug
+# set -x # Debug
 
-usealien=true # fetch the AQC results from alien, i.e. the merged file QC_fullrun.root
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+CWD=$(pwd)
 
-printplots=true
-plotformat=png
+CURLPROXY="-x socks5h://localhost:8081"
 
-overwrite=true
-remove_aqcfile=true
+USE_ALIEN=true # fetch the AQC results from alien, i.e. the merged file QC_fullrun.root
+OVERWRITE=true
+REMOVE_AQCFILE=true
 
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+PRINT_PLOTS=true
+PLOTFORMAT=png
 ROOTSTYLE_DIR="${SCRIPT_DIR}/../root_styles"
 
-cwd=$(pwd)
-
-PrintPlots()
-{
+print_plots() {
     # Print plots based on aqc_fv0.root in the current working directory
 
     if [ ! -d plots ]; then
@@ -32,68 +31,69 @@ PrintPlots()
     logylogz="${ROOTSTYLE_DIR}/logylogz.C"
 
     # AmpPerChannel
-    rootprint -f $plotformat aqc_fv0.root:FV0/Digits/AmpPerChannel
-    mv AmpPerChannel.$plotformat plots/AmpPerChannel.$plotformat
+    rootprint -f $PLOTFORMAT aqc_fv0.root:FV0/Digits/AmpPerChannel
+    mv AmpPerChannel.$PLOTFORMAT plots/AmpPerChannel.$PLOTFORMAT
 
-    rootprint -f $plotformat -S $logy aqc_fv0.root:FV0/Digits/AmpPerChannel
-    mv AmpPerChannel.$plotformat plots/AmpPerChannel_logy.$plotformat
+    rootprint -f $PLOTFORMAT -S $logy aqc_fv0.root:FV0/Digits/AmpPerChannel
+    mv AmpPerChannel.$PLOTFORMAT plots/AmpPerChannel_logy.$PLOTFORMAT
 
-    rootprint -f $plotformat -S $logylogz aqc_fv0.root:FV0/Digits/AmpPerChannel
-    mv AmpPerChannel.$plotformat plots/AmpPerChannel_logylogz.$plotformat
+    rootprint -f $PLOTFORMAT -S $logylogz aqc_fv0.root:FV0/Digits/AmpPerChannel
+    mv AmpPerChannel.$PLOTFORMAT plots/AmpPerChannel_logylogz.$PLOTFORMAT
 
     # Time per channel
-    rootprint -f $plotformat aqc_fv0.root:FV0/Digits/TimePerChannel
-    mv TimePerChannel.$plotformat plots/TimePerChannel.$plotformat
+    rootprint -f $PLOTFORMAT aqc_fv0.root:FV0/Digits/TimePerChannel
+    mv TimePerChannel.$PLOTFORMAT plots/TimePerChannel.$PLOTFORMAT
 
-    rootprint -f $plotformat -S $logz aqc_fv0.root:FV0/Digits/TimePerChannel
-    mv TimePerChannel.$plotformat plots/TimePerChannel_logz.$plotformat
+    rootprint -f $PLOTFORMAT -S $logz aqc_fv0.root:FV0/Digits/TimePerChannel
+    mv TimePerChannel.$PLOTFORMAT plots/TimePerChannel_logz.$PLOTFORMAT
 
     # Sum of amplitudes
-    rootprint -f $plotformat -S $logy aqc_fv0.root:FV0/Digits/SumAmpA
-    mv SumAmpA.$plotformat plots/SumAmpA_logy.$plotformat
+    rootprint -f $PLOTFORMAT -S $logy aqc_fv0.root:FV0/Digits/SumAmpA
+    mv SumAmpA.$PLOTFORMAT plots/SumAmpA_logy.$PLOTFORMAT
 
-    rootprint -f $plotformat -S $logxlogy aqc_fv0.root:FV0/Digits/SumAmpA
-    mv SumAmpA.$plotformat plots/SumAmpA_logxlogy.$plotformat
+    rootprint -f $PLOTFORMAT -S $logxlogy aqc_fv0.root:FV0/Digits/SumAmpA
+    mv SumAmpA.$PLOTFORMAT plots/SumAmpA_logxlogy.$PLOTFORMAT
 
-    rootprint -f $plotformat -S $logy aqc_fv0.root:FV0/DigitsPrepared/SumAmpAXRange
-    mv SumAmpAXRange.$plotformat plots/SumAmpA_xrange_logy.$plotformat
+    rootprint -f $PLOTFORMAT -S $logy aqc_fv0.root:FV0/DigitsPrepared/SumAmpAXRange
+    mv SumAmpAXRange.$PLOTFORMAT plots/SumAmpA_xrange_logy.$PLOTFORMAT
 
-    rootprint -f $plotformat -S $logxlogy aqc_fv0.root:FV0/DigitsPrepared/SumAmpAXRange
-    mv SumAmpAXRange.$plotformat plots/SumAmpA_xrange_logxlogy.$plotformat
+    rootprint -f $PLOTFORMAT -S $logxlogy aqc_fv0.root:FV0/DigitsPrepared/SumAmpAXRange
+    mv SumAmpAXRange.$PLOTFORMAT plots/SumAmpA_xrange_logxlogy.$PLOTFORMAT
 
     # Number of channels
-    rootprint -f $plotformat aqc_fv0.root:FV0/Digits/NumChannelsA
-    mv NumChannelsA.$plotformat plots/NumChannelsA.$plotformat
+    rootprint -f $PLOTFORMAT aqc_fv0.root:FV0/Digits/NumChannelsA
+    mv NumChannelsA.$PLOTFORMAT plots/NumChannelsA.$PLOTFORMAT
 
-    rootprint -f $plotformat -S $logy aqc_fv0.root:FV0/Digits/NumChannelsA
-    mv NumChannelsA.$plotformat plots/NumChannelsA_logy.$plotformat
+    rootprint -f $PLOTFORMAT -S $logy aqc_fv0.root:FV0/Digits/NumChannelsA
+    mv NumChannelsA.$PLOTFORMAT plots/NumChannelsA_logy.$PLOTFORMAT
 
     # Number of triggers
-    rootprint -f $plotformat aqc_fv0.root:FV0/Digits/TriggersSoftware
-    mv TriggersSoftware.$plotformat plots/TriggersSoftware.$plotformat
+    rootprint -f $PLOTFORMAT aqc_fv0.root:FV0/Digits/TriggersSoftware
+    mv TriggersSoftware.$PLOTFORMAT plots/TriggersSoftware.$PLOTFORMAT
 
-    rootprint -f $plotformat -S $logy aqc_fv0.root:FV0/Digits/TriggersSoftware
-    mv TriggersSoftware.$plotformat plots/TriggersSoftware_logy.$plotformat
+    rootprint -f $PLOTFORMAT -S $logy aqc_fv0.root:FV0/Digits/TriggersSoftware
+    mv TriggersSoftware.$PLOTFORMAT plots/TriggersSoftware_logy.$PLOTFORMAT
+
+    # Average time
+    rootprint -f $PLOTFORMAT aqc_fv0.root:FV0/Digits/AverageTimeA
+    mv AverageTimeA.$PLOTFORMAT plots/AverageTimeA.$PLOTFORMAT
 }
 
-Abort()
-{
+abort() {
     echo "Aborting..."
-    echo "$1" >> "${cwd}/failed.txt"
-    cd $cwd
+    echo "$1" >>"${CWD}/failed.txt"
+    cd $CWD
     exit 1
 }
 
-ExtractAQC()
-{
+extract_aqc() {
     year="$1"
     lhcperiod="$2"
     runnumber="$3"
     pass="$4"
 
     runstring="${year}_${lhcperiod}_${runnumber}_${pass}"
-
-    rundir="${cwd}/${lhcperiod}/${pass}/${runnumber}"
+    rundir="${CWD}/${lhcperiod}/${pass}/${runnumber}"
 
     if [ ! -d "${rundir}" ]; then
         mkdir -p $rundir
@@ -101,64 +101,70 @@ ExtractAQC()
 
     cd $rundir
 
-    echo $(date) > log.txt
-    echo "$year $period $runnumber $pass" >> log.txt
-    echo "Use alien=${usealien}" >> log.txt
+    echo $(date) >log.txt
+    echo "$year $period $runnumber $pass" >>log.txt
+    echo "Use alien=${USE_ALIEN}" >>log.txt
 
-    extract=false # whether or not to (re)create the aqc_fv0.root file (set to true if it doesn't exist or if $overwrite = true)
+    extract=false # whether or not to (re)create the aqc_fv0.root file (set to true if it doesn't exist or if $OVERWRITE = true)
 
-    if $usealien; then
+    if $USE_ALIEN; then
         # Download QC_fullrun.root from alien
-        ( $overwrite || [ ! -e QC_fullrun.root ] ) && download=true || download=false
-        ( $download || [ ! -e aqc_fv0.root ] ) && extract=true || extract=false
+        ($OVERWRITE || [ ! -f QC_fullrun.root ]) && download=true || download=false
+        ($download || [ ! -f aqc_fv0.root ]) && extract=true || extract=false
 
         if $download; then
             alienpath="/alice/data/${year}/${lhcperiod}/${runnumber}/${pass}"
             qcfullrun_filename=$(alien_find "${alienpath} QC_fullrun.root")
             if [[ $? -ne 0 || "$qcfullrun_filename" = "" ]]; then
-                echo "QC_fullrun.root not found in ${alienpath}" >> log.txt
-                Abort $runstring
+                echo "QC_fullrun.root not found in ${alienpath}" >>log.txt
+                abort $runstring
             fi
             alien_cp $qcfullrun_filename file:.
             if [ $? -ne 0 ]; then
-                echo "Failed to copy ${qcfullrun_filename}" >> log.txt
-                Abort $runstring
+                echo "Failed to copy ${qcfullrun_filename}" >>log.txt
+                abort $runstring
             fi
         fi
     else
-        ( $overwrite || [ ! -e aqc_fv0.root ] ) && extract=true || extract=false
+        ($OVERWRITE || [ ! -f aqc_fv0.root ]) && extract=true || extract=false
     fi
 
     if $extract; then
-        root -b -l -q "${SCRIPT_DIR}/ExtractAQCPlots.C(${usealien})" > root_log.txt
+        root -b -l -q "${SCRIPT_DIR}/ExtractAQCPlots.C(${USE_ALIEN})" >root_log.txt
         if [ $? -ne 0 ]; then
             echo "ROOT macro ${SCRIPT_DIR}/ExtractAQCPlots.C failed. See root_log.txt for info."
-            echo "ROOT macro ${SCRIPT_DIR}/ExtractAQCPlots.C failed. See root_log.txt for info." >> log.txt
+            echo "ROOT macro ${SCRIPT_DIR}/ExtractAQCPlots.C failed. See root_log.txt for info." >>log.txt
             # TODO: remove QC_fullrun.root
-            Abort $runstring
+            abort $runstring
         fi
     else
-        echo "Will not extract plots" >> log.txt
+        echo "Will not extract plots" >>log.txt
     fi
 
-    if [[ "$usealien" = "true" && "$remove_aqcfile" = "true" ]]; then
+    # Trigger validation has to be checked from online QC at the moment
+    curl $CURLPROXY -s http://alio2-cr1-hv-qcdb-gpn.cern.ch:8083/browse/qc/FV0/QO/TrgValidationCheck/RunNumber=$runnumber | grep 'qc_quality = \(2\|3\|10\)' >TrgValidationCheck.txt
+    n_qo_not_good=$(cat TrgValidationCheck.txt | wc -l)
+    if [ $n_qo_not_good -eq 0 ]; then
+        rm TrgValidationCheck.txt
+    fi
+
+    if [[ "$USE_ALIEN" = "true" && "$REMOVE_AQCFILE" = "true" ]]; then
         rm QC_fullrun.root
     fi
 
-    if $printplots; then
-        PrintPlots
+    if $PRINT_PLOTS; then
+        print_plots
     fi
 
-    cd $cwd
+    cd $CWD
 }
 
 if [ "$#" -eq 1 ]; then
-    while IFS="," read -r year period runnumber pass;
-    do
-        ExtractAQC "$year" "$period" "$runnumber" "$pass"
-    done < $1
+    while IFS="," read -r year period runnumber pass; do
+        extract_aqc "$year" "$period" "$runnumber" "$pass"
+    done <$1
 elif [ "$#" -eq 4 ]; then
-    ExtractAQC "$1" "$2" "$3" "$4"
+    extract_aqc "$1" "$2" "$3" "$4"
 else
     echo "Usage: $0 <inputfile>"
     echo "or"
