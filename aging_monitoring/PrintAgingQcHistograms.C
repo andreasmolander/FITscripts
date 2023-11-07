@@ -123,7 +123,12 @@ int PrintAgingQcHistograms(const char* inputFileName,
     std::cout << "Unable to open input file '" << inputFileName << "'." << std::endl;
     return 1;
   }
-  TObjArray* moCollection = fInput->Get<TObjArray>("FT0/AgingLaser");
+  // TObjArray* moCollection = fInput->Get<TObjArray>("FT0/AgingLaser");
+  TObjArray* moCollection = fInput->Get<TObjArray>("int/FT0/AgingLaser");
+  if (!moCollection) {
+    std::cout << "MonitorObject collection not found in the input file." << std::endl;
+    return 1;
+  }
 
   // 1D histograms to be printed
   TObjArray* histograms = new TObjArray();

@@ -6,10 +6,10 @@
 
 set -x # Debug
 
-year=
-lhcperiod=
-runnumber=
-type="raw"
+year=""
+lhcperiod=""
+runnumber=""
+type=""
 nfiles=-1
 filename=file.lst
 
