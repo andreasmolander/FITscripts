@@ -4,6 +4,8 @@
 #
 # Usage: fitqa.sh [OPTION]
 
+# set -x # Debug
+
 # detectors
 doFIT=false # not implemented yet
 doFT0=false
@@ -39,39 +41,15 @@ Usage() {
 # Parse script arguments
 while [ $# -gt 0 ]; do
     case $1 in
-    -c | --config)
-        config="--configuration json://$2"
-        shift 2
-        ;;
-    --aod-file)
-        aodfile="--aod-file $2"
-        shift 2
-        ;;
-    -b | --batch)
-        batchmode="-b"
-        shift 1
-        ;;
-    --bcconv)
-        bcconv=true
-        shift 1
-        ;;
-    --collconv)
-        collconv=true
-        shift 1
-        ;;
-    --zdcconv)
-        zdcconv=true
-        shift 1
-        ;;
-    -p | --print)
-        print=true
-        shift 1
-        ;;
-    -h | --help) Usage ;;
-    *)
-        echo "Wrong input"
-        Usage
-        ;;
+    -c | --config)   config="--configuration json://$2"; shift 2 ;;
+         --aod-file) aodfile="--aod-file $2";            shift 2 ;;
+    -b | --batch)    batchmode="-b";                     shift 1 ;;
+         --bcconv)   bcconv=true;                        shift 1 ;;
+         --collconv) collconv=true;                      shift 1 ;;
+         --zdcconv)  zdcconv=true;                       shift 1 ;;
+    -p | --print)    print=true;                         shift 1 ;;
+    -h | --help)     Usage ;;
+    *)               echo "Wrong input"; Usage ;
     esac
 done
 
@@ -98,6 +76,7 @@ workflow+=" | o2-analysis-event-selection $args_all"
 workflow+=" | o2-analysis-multiplicity-table $args_all"
 if [ "$doFIT" = true ]; then
     echo "Common FIT QA not implemented yet"
+    exit 1
 fi
 if [ "$doFT0" = true ]; then
     workflow+=" | o2-analysis-ft0-corrected-table $args_all"
@@ -110,7 +89,7 @@ if [ "$doFDD" = true ]; then
     workflow+=" | o2-analysis-fdd-qa $args_all"
 fi
 
-if [ $print = true ]; then
+if [ "$print" = true ]; then
     # Print the workflow command without running it
     echo "Workflow command:"
     echo $workflow | sed 's/| /|\n/g'

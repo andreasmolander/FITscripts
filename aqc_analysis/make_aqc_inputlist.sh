@@ -37,13 +37,13 @@ while IFS= read -r line; do
         path="${BASH_REMATCH[2]}"
 
         # Extract YEAR, LHCPERIOD, and PASS from the path
-				IFS='/' read -r -a path_array <<< "$path"
-				year="${path_array[3]}"
-				lhcperiod="${path_array[4]}"
-				pass="${path_array[6]}"
+        IFS='/' read -r -a path_array <<< "$path"
+        year="${path_array[3]}"
+        lhcperiod="${path_array[4]}"
+        pass="${path_array[6]}"
 
-				# Write the output to the output file
-				echo "$year,$lhcperiod,$run_number,$pass" >> "$output_file"
+        # Write the output to the output file
+        echo "$year,$lhcperiod,$run_number,$pass" >> "$output_file"
     fi
 done < "$input_file"
 
